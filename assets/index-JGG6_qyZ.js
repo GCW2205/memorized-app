@@ -1,0 +1,326 @@
+(function(){let e=document.createElement(`link`).relList;if(e&&e.supports&&e.supports(`modulepreload`))return;for(let e of document.querySelectorAll(`link[rel="modulepreload"]`))n(e);new MutationObserver(e=>{for(let t of e)if(t.type===`childList`)for(let e of t.addedNodes)e.tagName===`LINK`&&e.rel===`modulepreload`&&n(e)}).observe(document,{childList:!0,subtree:!0});function t(e){let t={};return e.integrity&&(t.integrity=e.integrity),e.referrerPolicy&&(t.referrerPolicy=e.referrerPolicy),t.credentials=e.crossOrigin===`use-credentials`?`include`:e.crossOrigin===`anonymous`?`omit`:`same-origin`,t}function n(e){if(e.ep)return;e.ep=!0;let n=t(e);fetch(e.href,n)}})();var e=`memorized:v1`,t=`Memorized`,n={theme:`light`,fontSize:`large`,language:`en`,notificationsEnabled:!1,reminderTime:`09:00`,updatedAt:null},r={streak:0,lastPracticeDate:null,totalPracticed:0,strongerCount:0,deletedIds:[]};function i(e){let t=new Map;if(Array.isArray(e))for(let n of e){let e=typeof n==`string`?n:n&&typeof n.id==`string`?n.id:null;if(!e)continue;let r=n&&typeof n==`object`&&typeof n.deletedAt==`string`?n.deletedAt:null,i=t.get(e);(i===void 0||r&&(!i||Date.parse(r)>Date.parse(i)))&&t.set(e,r)}return Array.from(t,([e,t])=>({id:e,deletedAt:t||`1970-01-01T00:00:00.000Z`}))}function a(...e){return i(e.flatMap(e=>Array.isArray(e)?e:[]))}function o(e){if(typeof e!=`string`||!e)return null;let t=Date.parse(e);return Number.isFinite(t)&&t>0?t:null}function s(e){let t=/^m_([0-9a-z]+)_/.exec(typeof e==`string`?e:``);if(!t)return null;let n=parseInt(t[1],36);return Number.isFinite(n)&&n>=15778368e5&&n<41024448e5?n:null}function c(e){if(!e)return null;if(o(e.createdAt)!=null)return e.createdAt;let t=[s(e.id),o(e.lastReviewedAt),o(e.updatedAt)].filter(e=>e!=null);return t.length?new Date(Math.min(...t)).toISOString():null}function l(e){return e.updatedAt||e.lastReviewedAt||e.createdAt||`1970-01-01T00:00:00.000Z`}function u(){return{items:[],settings:{...n},stats:{...r,deletedIds:[]}}}function d(){try{let t=localStorage.getItem(e);if(!t)return u();let a=JSON.parse(t),o={...r,...a.stats||{}};return o.deletedIds=i(o.deletedIds),{items:(Array.isArray(a.items)?a.items:[]).map(e=>{if(!e||typeof e!=`object`)return e;let t=e;if(!t.createdAt){let e=c(t);e&&(t={...t,createdAt:e})}return t.updatedAt||(t={...t,updatedAt:l(t)}),t}),settings:{...n,...a.settings||{}},stats:o}}catch{return u()}}function f(t){localStorage.setItem(e,JSON.stringify({items:t.items,settings:t.settings,stats:t.stats}))}function p(){return`m_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`}function m(e=new Date){return`${e.getFullYear()}-${String(e.getMonth()+1).padStart(2,`0`)}-${String(e.getDate()).padStart(2,`0`)}`}function h(e){return{id:e.id,sentence:e.raw??e.sentence??``,type:e.type??`Other`,question:e.question??``,answer:e.answer??``,label:e.label??``,createdAt:c(e),intervalIndex:e.intervalIndex??0,intervalDays:e.intervalDays??1,dueAt:e.dueAt??e.nextReviewAt??null,lastReviewedAt:e.lastReviewedAt??null,timesCorrect:e.timesCorrect??0,timesWrong:e.timesWrong??0,practiced:!!e.practiced,updatedAt:l(e)}}function g(e){if(!e||typeof e!=`object`)return null;let t=typeof e.id==`string`&&e.id?e.id:p(),n=String(e.sentence??e.raw??``).trim(),r=String(e.question??``).trim(),i=String(e.answer??``).trim();if(!r&&!i&&!n)return null;let a=c({...e,id:t});return{id:t,raw:n||`${r} ${i}`.trim(),type:String(e.type||`Other`),question:r||n||`Fact`,answer:i||`(blank)`,label:String(e.label||r||n||``).slice(0,80),createdAt:a,intervalIndex:Number.isFinite(e.intervalIndex)?e.intervalIndex:0,intervalDays:Number.isFinite(e.intervalDays)?e.intervalDays:1,nextReviewAt:e.dueAt||e.nextReviewAt||new Date().toISOString(),lastReviewedAt:e.lastReviewedAt??null,timesCorrect:Number(e.timesCorrect)||0,timesWrong:Number(e.timesWrong)||0,practiced:!!e.practiced,updatedAt:e.updatedAt||e.lastReviewedAt||a||new Date().toISOString()}}function _(e){let t={...n,...e||{}};return{theme:t.theme,fontSize:t.fontSize,language:t.language,notifications:{enabled:!!t.notificationsEnabled,time:t.reminderTime||`09:00`},updatedAt:t.updatedAt||null}}function v(e){let t={...n};if(!e||typeof e!=`object`)return t;let r={...t,...e};return e.notifications&&typeof e.notifications==`object`&&(r.notificationsEnabled=!!e.notifications.enabled,r.reminderTime=e.notifications.time||t.reminderTime),delete r.notifications,{theme:r.theme===`dark`?`dark`:`light`,fontSize:r.fontSize||t.fontSize,language:r.language||t.language,notificationsEnabled:!!r.notificationsEnabled,reminderTime:r.reminderTime||t.reminderTime,updatedAt:typeof r.updatedAt==`string`?r.updatedAt:null}}function y(e){let t={...r,...e||{}};return{streak:t.streak||0,lastPracticeDate:t.lastPracticeDate??null,totalPracticed:t.totalPracticed||0,strongerCount:t.strongerCount||0,deletedIds:i(t.deletedIds)}}function ee(e){return!e||typeof e!=`object`?{...r,deletedIds:[]}:{streak:Number(e.streak)||0,lastPracticeDate:e.lastPracticeDate??null,totalPracticed:Number(e.totalPracticed)||0,strongerCount:Number(e.strongerCount)||0,deletedIds:i(e.deletedIds)}}function te(e,n=new Date){let r={app:t,schemaVersion:1,exportedAt:n.toISOString(),items:(e.items||[]).map(h),settings:_(e.settings),meta:y(e.stats)};return{filename:`memorized-backup-${m(n)}.json`,json:JSON.stringify(r,null,2),doc:r}}function ne(e){let t;try{t=typeof e==`string`?JSON.parse(e):e}catch{return{ok:!1,error:`Not valid JSON`}}if(!t||typeof t!=`object`||Array.isArray(t))return{ok:!1,error:`Backup must be a JSON object`};if(t.app!=null&&t.app!==`Memorized`)return{ok:!1,error:`Unknown app: ${t.app}`};let n=t.schemaVersion;return n==null?{ok:!1,error:`Missing schemaVersion`}:typeof n!=`number`||n<1||n>1?{ok:!1,error:`Unsupported schemaVersion ${n} (supported: 1–1)`}:Array.isArray(t.items)?{ok:!0,doc:t}:{ok:!1,error:`Missing items array`}}function re(e,t,n){let i=t.items.map(g).filter(Boolean),o;if(n===`replace`)o=i;else{let t=new Map(e.items.map(e=>[e.id,e]));for(let e of i)t.set(e.id,e);o=Array.from(t.values())}let s=n===`replace`||t.settings?v(t.settings):{...e.settings},c=n===`merge`&&!t.settings?{...e.settings}:s,l;if(n===`replace`)l=ee(t.meta);else if(t.meta){let n=ee(t.meta),i={...r,...e.stats};l={streak:Math.max(i.streak||0,n.streak||0),lastPracticeDate:n.lastPracticeDate||i.lastPracticeDate,totalPracticed:Math.max(i.totalPracticed||0,n.totalPracticed||0),strongerCount:Math.max(i.strongerCount||0,n.strongerCount||0),deletedIds:a(i.deletedIds,n.deletedIds)}}else l={...e.stats};return{items:o,settings:c,stats:l,importedCount:i.length,totalCount:o.length}}function ie(e){let t=e=>{let t=String(e??``);return/[",\n\r]/.test(t)?`"${t.replace(/"/g,`""`)}"`:t},n=[`type`,`sentence`,`question`,`answer`,`due`,`interval`],r=(e.items||[]).map(e=>{let n=e.nextReviewAt||e.dueAt||``,r=n?String(n).slice(0,10):``;return[e.type,e.raw??e.sentence??``,e.question,e.answer,r,e.intervalDays??``].map(t)});return[n.join(`,`),...r.map(e=>e.join(`,`))].join(`
+`)}function ae(e=new Date){return`memorized-items-${m(e)}.csv`}var b=[1,3,7,14,30,90];function x(e=new Date){let t=new Date(e);return t.setHours(0,0,0,0),t}function oe(e,t){let n=new Date(e);return n.setDate(n.getDate()+t),n}function se(e,t=new Date){return!e.nextReviewAt||x(new Date(e.nextReviewAt)).getTime()<=x(t).getTime()}function ce(e,t=new Date){return e.filter(e=>se(e,t))}function le(e=new Date){return{intervalIndex:0,intervalDays:b[0],nextReviewAt:x(e).toISOString(),lastReviewedAt:null,timesCorrect:0,timesWrong:0,practiced:!1}}function ue(e,t=new Date){let n=Math.min((e.intervalIndex??0)+1,b.length-1),r=b[n];return{...e,intervalIndex:n,intervalDays:r,nextReviewAt:x(oe(t,r)).toISOString(),lastReviewedAt:t.toISOString(),timesCorrect:(e.timesCorrect||0)+1,practiced:!0}}function de(e,t=new Date){let n=e.intervalIndex??0,r=b[Math.min(n,b.length-1)];return{...e,intervalIndex:n,intervalDays:r,nextReviewAt:x(oe(t,r)).toISOString(),lastReviewedAt:t.toISOString(),timesWrong:(e.timesWrong||0)+1,practiced:!0}}function fe(e=new Date){let t=x(e);return`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,`0`)}-${String(t.getDate()).padStart(2,`0`)}`}function pe(e,t=new Date){let n=fe(t),r=e.lastPracticeDate;if(r===n)return{...e};let i=fe(oe(t,-1)),a=e.streak||0;return r===i?a+=1:a=1,{...e,streak:a,lastPracticeDate:n}}function me(e){return(e.intervalIndex??0)>=3}var he=[`Jan`,`Feb`,`Mar`,`Apr`,`May`,`Jun`,`Jul`,`Aug`,`Sep`,`Oct`,`Nov`,`Dec`];function ge(e){let t=Date.parse(typeof e==`string`?e:``);if(!Number.isFinite(t)||t<=0)return`—`;let n=new Date(t);return`${n.getDate()} ${he[n.getMonth()]} ${n.getFullYear()}`}function _e(e){let t=Number(e?.intervalDays);return Number.isFinite(t)&&t>=0?t:b[Math.min(Math.max(Number(e?.intervalIndex)||0,0),b.length-1)]}function ve(e){let t=Number(e);if(!Number.isFinite(t)||t<=0)return`Today`;if(t<1){let e=Math.max(1,Math.round(t*24*60));if(e<60)return`${e}m`;let n=Math.round(e/60);return n>=24?`1d`:`${n}h`}return`${Math.round(t)}d`}function ye(e){return ve(_e(e))}function S(e){let t=Date.parse(e||``);return Number.isFinite(t)?t:0}function be(){return{items:[],settings:{...n},stats:{...r,deletedIds:[]}}}function xe(e){let t=re(be(),e,`replace`);return{items:t.items,settings:t.settings,stats:t.stats}}function Se(e,t){let i=e||be(),o=t||be(),s=new Map(a(i.stats?.deletedIds,o.stats?.deletedIds).map(e=>[e.id,e.deletedAt])),c=new Map;for(let e of o.items||[])e&&e.id&&c.set(e.id,e);for(let e of i.items||[]){if(!e||!e.id)continue;let t=c.get(e.id);(!t||S(l(e))>=S(l(t)))&&c.set(e.id,e)}let u=[];for(let e of c.values()){if(s.has(e.id)){if(S(s.get(e.id))>=S(l(e)))continue;s.delete(e.id)}u.push(e.updatedAt?e:{...e,updatedAt:l(e)})}u.sort((e,t)=>S(t.createdAt)-S(e.createdAt)||String(e.id).localeCompare(String(t.id)));let d={...n,...i.settings||{}},f={...n,...o.settings||{}},p={...S(f.updatedAt)>S(d.updatedAt)?f:d,notificationsEnabled:!!d.notificationsEnabled},m={...r,...i.stats||{}},h={...r,...o.stats||{}},g=m.lastPracticeDate||``,_=h.lastPracticeDate||``,v,y;return g>_?(v=m.streak||0,y=m.lastPracticeDate):_>g?(v=h.streak||0,y=h.lastPracticeDate):(v=Math.max(m.streak||0,h.streak||0),y=m.lastPracticeDate??h.lastPracticeDate??null),{items:u,settings:p,stats:{streak:v,lastPracticeDate:y,totalPracticed:Math.max(m.totalPracticed||0,h.totalPracticed||0),strongerCount:u.filter(e=>(e.intervalIndex??0)>=3).length,deletedIds:Array.from(s,([e,t])=>({id:e,deletedAt:t})).sort((e,t)=>e.id.localeCompare(t.id))}}}var Ce=`modulepreload`,we=function(e,t){return new URL(e,t).href},Te={},Ee=function(e,t,n){let r=Promise.resolve();if(t&&t.length>0){let e=document.getElementsByTagName(`link`),i=document.querySelector(`meta[property=csp-nonce]`),a=i?.nonce||i?.getAttribute(`nonce`);function o(e){return Promise.all(e.map(e=>Promise.resolve(e).then(e=>({status:`fulfilled`,value:e}),e=>({status:`rejected`,reason:e}))))}function s(e){return import.meta.resolve?import.meta.resolve(e):new URL(e,import.meta.url).href}r=o(t.map(t=>{if(t=we(t,n),t=s(t),t in Te)return;Te[t]=!0;let r=t.endsWith(`.css`);for(let n=e.length-1;n>=0;n--){let i=e[n];if(i.href===t&&(!r||i.rel===`stylesheet`))return}let i=document.createElement(`link`);if(i.rel=r?`stylesheet`:Ce,r||(i.as=`script`),i.crossOrigin=``,i.href=t,a&&i.setAttribute(`nonce`,a),document.head.appendChild(i),r)return new Promise((e,n)=>{i.addEventListener(`load`,e),i.addEventListener(`error`,()=>n(Error(`Unable to preload CSS for ${t}`)))})}).filter(e=>e!==void 0))}function i(e){let t=new Event(`vite:preloadError`,{cancelable:!0});if(t.payload=e,window.dispatchEvent(t),!t.defaultPrevented)throw e}return r.then(t=>{for(let e of t||[])e.status===`rejected`&&i(e.reason);return e().catch(i)})},De=`https://zzvmimpdstazgrgoqfbu.supabase.co`,Oe=`sb_publishable_1M-DjO-0G8x6Qh9-ucSy2g_V3s8Aq-c`,ke=`user_data`,C=!!Oe,Ae=null;function je(){return window.location.origin+window.location.pathname}function Me(e){return C?(Ae||=Ee(async()=>{let{createClient:e}=await import(`./dist-DGrmSOon.js`);return{createClient:e}},[],import.meta.url).then(({createClient:t})=>{let n=t(De,Oe,{auth:{persistSession:!0,autoRefreshToken:!0,detectSessionInUrl:!0,flowType:`implicit`}});return n.auth.onAuthStateChange((t,n)=>{setTimeout(()=>e(t,n),0)}),n}),Ae):Promise.resolve(null)}async function w(){let e=await Ae;if(!e)throw Object.assign(Error(`Accounts are not available`),{kind:`unavailable`});return e}async function Ne(e,t){let{data:n,error:r}=await(await w()).auth.signInWithPassword({email:e,password:t});if(r)throw r;return n}async function Pe(e,t){let{data:n,error:r}=await(await w()).auth.signUp({email:e,password:t,options:{emailRedirectTo:je()}});if(r)throw r;return n}async function Fe(e){let{error:t}=await(await w()).auth.resetPasswordForEmail(e,{redirectTo:je()});if(t)throw t}async function Ie(e){let{data:t,error:n}=await(await w()).auth.updateUser({password:e});if(n)throw n;return t}async function Le(){let{error:e}=await(await w()).auth.signOut({scope:`local`});if(e)throw e}function Re(e,t){let n=e?.code||``,r=`${e?.message||``} ${e?.details||``} ${e?.hint||``}`.toLowerCase(),i=`error`;return n===`PGRST205`||n===`42P01`||t===404||r.includes(`does not exist`)||r.includes(`could not find the table`)||r.includes(`schema cache`)?i=`notsetup`:t===401||t===403||n===`PGRST301`||n===`42501`?i=`auth`:(!t||r.includes(`failed to fetch`)||r.includes(`network`))&&(i=`offline`),Object.assign(Error(e?.message||`Sync failed`),{kind:i,code:n,status:t})}async function ze(e){let{data:t,error:n,status:r}=await(await w()).from(ke).select(`data, updated_at`).eq(`user_id`,e).maybeSingle();if(n)throw Re(n,r);return t||null}async function Be(e,t){let{error:n,status:r}=await(await w()).from(ke).upsert({user_id:e,data:t,updated_at:new Date().toISOString()},{onConflict:`user_id`});if(n)throw Re(n,r)}function Ve(e){let t=String(e?.message||``).toLowerCase(),n=String(e?.code||``).toLowerCase(),r=e?.status;return e?.kind===`unavailable`?`Accounts are not available right now.`:typeof navigator<`u`&&navigator.onLine===!1||t.includes(`failed to fetch`)||t.includes(`network`)||t.includes(`load failed`)?`Can’t reach the internet right now. Please check your connection and try again.`:n===`invalid_credentials`||t.includes(`invalid login credentials`)?`That email and password don’t match. Please try again.`:n===`email_not_confirmed`||t.includes(`email not confirmed`)?`Please confirm your email first. Look for our message in your inbox, then sign in.`:n===`user_already_exists`||t.includes(`already registered`)?`There is already an account with this email. Please sign in instead.`:n===`same_password`||t.includes(`different from the old`)?`Please choose a password that is different from your old one.`:n===`weak_password`||t.includes(`password should`)?`Please choose a stronger password (at least 8 characters).`:r===429||n.includes(`rate_limit`)||t.includes(`rate limit`)?`Too many tries just now. Please wait a few minutes and try again.`:n===`email_address_invalid`||t.includes(`invalid email`)||t.includes(`email address`)?`That email address doesn’t look right. Please check it.`:n===`session_not_found`||n===`session_expired`||t.includes(`session`)?`This link has expired. Please ask for a new one.`:n===`signup_disabled`||t.includes(`signups not allowed`)?`New accounts can’t be created right now.`:`Something went wrong. Please try again.`}var He=`jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|sept|september|oct|october|nov|november|dec|december`,Ue=new RegExp(String.raw`(?:(?:\d{1,2})(?:st|nd|rd|th)?[\s\-/.,]*(?:${He})[\s\-/.,]*\d{2,4})|(?:(?:${He})[\s\-/.,]*\d{1,2}(?:st|nd|rd|th)?[\s\-/.,]*\d{2,4})|(?:\d{1,2}[\s\-/]\d{1,2}[\s\-/]\d{2,4})|(?:\d{4}-\d{2}-\d{2})`,`i`),We=/(?:\+?\d[\d\s\-().]{5,}\d)/,T=/\b(mobile|phone|cell|tel|number|whatsapp|contact)\b/i,Ge=/\b(birthday|bday|dob|born|birth\s*date|birthdate)\b/i,Ke=/\b(?:name|called|aka|fullname|nickname)\b/i,qe=/\b(anniversary|wedding|meeting|appointment|event|party|graduation|funeral|holiday|trip|flight|deadline)\b/i;function E(e){let t=e.trim();return t?/s$/i.test(t)?`${t}'`:`${t}'s`:`this person's`}function D(e){return e.split(/\s+/).filter(Boolean).map(e=>/^\d/.test(e)?e:e.charAt(0).toUpperCase()+e.slice(1).toLowerCase()).join(` `)}function O(e){return String(e||``).replace(/\s+/g,` `).trim()}function k(e){let t=O(e).replace(/^(my|the|our)\s+/i,``).split(/\s+/).filter(Boolean);if(t.length===0)return``;let n=new Set([`birthday`,`bday`,`dob`,`mobile`,`phone`,`cell`,`tel`,`number`,`name`,`anniversary`,`event`,`meeting`,`contact`,`whatsapp`,`born`,`birthdate`]);for(;t.length&&n.has(t[t.length-1].toLowerCase());)t.pop();return D(t.join(` `))}function Je(e){let t=O(e);if(!t)return{type:`Other`,question:`What did you want to remember?`,answer:``,label:``,raw:t};let n=t.match(Ue);if(n){let e=O(n[0]),r=t.slice(0,n.index);if(Ge.test(t)){let n=k(r.replace(Ge,` `)),i=n?`${n} Birthday`:`Birthday`;return{type:`Date`,question:n?`When is ${E(n)} birthday?`:`When is the birthday?`,answer:e,label:i,raw:t}}if(qe.test(t)){let n=(t.match(qe)||[`event`])[0],i=k(r.replace(qe,` `));return{type:`Event`,question:`When is ${i?`${E(i)} ${n.toLowerCase()}`:`the ${n.toLowerCase()}`}?`,answer:e,label:i?`${i} ${D(n)}`:D(n),raw:t}}let i=k(r)||O(r);return{type:`Date`,question:i?`When is ${i}?`:`When is this date?`,answer:e,label:i||`Date`,raw:t}}let r=t.match(We),i=(t.match(/\d/g)||[]).length;if(r&&(T.test(t)||i>=7)){let e=O(r[0]),n=k(t.slice(0,r.index).replace(T,` `)),i=n||`Contact`;return{type:`Phone number`,question:`What is ${E(n||`this contact`)} mobile?`,answer:e,label:i,raw:t}}if(T.test(t)&&i>=7){let e=t.replace(/\D/g,``),n=k(t.replace(We,``).replace(T,` `));return{type:`Phone number`,question:`What is ${E(n||`this contact`)} mobile?`,answer:e,label:n||`Contact`,raw:t}}if(Ke.test(t)){let e=t.split(Ke),n=O(e[0]||``),r=O(e.slice(1).join(` `)||``);if(r){let e=k(n)||`this`;return{type:`Name`,question:e===`this`?`What is the name?`:`What is ${E(e)} name?`,answer:D(r),label:e===`this`?`Name`:e,raw:t}}}if(qe.test(t))return{type:`Event`,question:`What is this event?`,answer:t,label:D(t.slice(0,40)),raw:t};let a=t.split(/\s+/);if(a.length>=2){let e=a[a.length-1],n=a.slice(0,-1).join(` `);if(/^\d+$/.test(e)||e.length<=24){let r=k(n);return T.test(n)||/^\d{7,}$/.test(e)?{type:`Phone number`,question:`What is ${E(r||`this contact`)} mobile?`,answer:e,label:r||`Contact`,raw:t}:{type:`Other`,question:r?`What about ${r}?`:`What is ${n}?`,answer:/^\d+$/.test(e)?e:D(e),label:r||D(n).slice(0,40)||`Fact`,raw:t}}}return{type:`Other`,question:`What did you save?`,answer:t,label:t.slice(0,40),raw:t}}function Ye(e,t){let n=Xe(e),r=Xe(t);if(!n||!r)return!1;if(n===r)return!0;let i=n.replace(/\D/g,``),a=r.replace(/\D/g,``);if(i.length>=7&&i===a)return!0;let o=Qe(n),s=Qe(r);return!!(o&&s&&o===s||n.length>=4&&r.length>=4&&(n.includes(r)||r.includes(n)))}function Xe(e){return String(e||``).toLowerCase().replace(/[.,/#'"]/g,` `).replace(/\s+/g,` `).trim()}var Ze={jan:1,january:1,feb:2,february:2,mar:3,march:3,apr:4,april:4,may:5,jun:6,june:6,jul:7,july:7,aug:8,august:8,sep:9,sept:9,september:9,oct:10,october:10,nov:11,november:11,dec:12,december:12};function Qe(e){let t=e.toLowerCase().replace(/(st|nd|rd|th)/g,``).replace(/,/g,` `).trim(),n=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(n)return`${n[1]}-${A(n[2])}-${A(n[3])}`;if(n=t.match(/^(\d{1,2})\s+([a-z]+)\s+(\d{2,4})$/),n&&Ze[n[2]])return`${$e(n[3])}-${A(Ze[n[2]])}-${A(n[1])}`;if(n=t.match(/^([a-z]+)\s+(\d{1,2})\s+(\d{2,4})$/),n&&Ze[n[1]])return`${$e(n[3])}-${A(Ze[n[1]])}-${A(n[2])}`;if(n=t.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/),n){let e=$e(n[3]),t=+n[1],r=+n[2];return t>12?`${e}-${A(r)}-${A(t)}`:r>12?`${e}-${A(t)}-${A(r)}`:`${e}-${A(r)}-${A(t)}`}return null}function $e(e){let t=parseInt(e,10);return String(e).length<=2?t>=50?1900+t:2e3+t:t}function A(e){return String(e).padStart(2,`0`)}var et=[`Jan`,`Feb`,`Mar`,`Apr`,`May`,`Jun`,`Jul`,`Aug`,`Sep`,`Oct`,`Nov`,`Dec`];function tt(e){let t=[...e];for(let e=t.length-1;e>0;e--){let n=Math.floor(Math.random()*(e+1));[t[e],t[n]]=[t[n],t[e]]}return t}function j(e,t,n){let r=nt(t);r&&(e.some(e=>nt(e)===r)||nt(n)===r&&e.includes(n)||e.push(t))}function nt(e){return String(e||``).toLowerCase().replace(/\s+/g,` `).trim()}function rt(e){let t=String(e).trim(),n=t.match(/(\d{1,2})\s*([A-Za-z]+)\s*(\d{2,4})/);if(n)return{day:+n[1],monthStr:n[2],year:n[3],format:`dmy`};let r=t.match(/([A-Za-z]+)\s*(\d{1,2})\s*(\d{2,4})/);if(r)return{day:+r[2],monthStr:r[1],year:r[3],format:`mdy`};let i=t.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);return i?{day:+i[1],month:+i[2],year:i[3],format:`num`}:null}function it(e,t,n,r){return e.format===`mdy`?`${n} ${t} ${r}`:e.format===`num`?`${t}/${e.month||1}/${r}`:`${t} ${n} ${r}`}function at(e){let t=rt(e),n=[];if(!t)return n.push(`1 Jan 2000`,`15 Mar 1985`,`22 Dec 1999`),n;let r=t.monthStr||et[(t.month||1)-1]||`Jan`,i=et.findIndex(e=>e.toLowerCase().startsWith(r.slice(0,3).toLowerCase())),a=t.year,o=t.day;j(n,it(t,(o+3-1)%28+1,r,a),e),j(n,it(t,o,et[(i+2+12)%12]||`Mar`,a),e);let s=parseInt(a,10);return j(n,it(t,o,r,String((a.length,s+2))),e),j(n,it(t,(o+10-1)%28+1,et[(i+5+12)%12]||`Aug`,a),e),n}function ot(e){let t=String(e).replace(/\D/g,``),n=[];if(t.length>=4){let r=(e,t,n)=>e.slice(0,t)+n+e.slice(t+1);j(n,r(t,t.length-2,String((+t[t.length-2]+1)%10)),e),j(n,r(t,Math.floor(t.length/2),String((+t[Math.floor(t.length/2)]+3)%10)),e),j(n,t.slice(0,-1)+String((+t.slice(-1)+2)%10),e),j(n,`9`+t.slice(1),e)}for(;n.length<3;)j(n,String(9e7+Math.floor(Math.random()*9999999)),e);return n}function st(e,t){let n=[`Alex`,`Sam`,`Jordan`,`Taylor`,`Casey`,`Morgan`,`Riley`,`Jamie`,`Avery`,`Quinn`],r=[];for(let n of t)(n.type===`Name`||n.type===`Other`)&&j(r,n.answer,e);for(let t of tt(n))j(r,t,e);return r}function ct(e,t){let n=[];for(let r of tt(t))j(n,r.answer,e);for(let t of[`Not sure`,`None of these`,`Unknown`,`N/A`,`Something else`])j(n,t,e);return n}function lt(e,t){let n=e.answer,r=[],i=t.filter(t=>t.id!==e.id);switch(e.type){case`Date`:case`Event`:r=at(n);for(let e of i)(e.type===`Date`||e.type===`Event`)&&j(r,e.answer,n);break;case`Phone number`:r=ot(n);for(let e of i)e.type===`Phone number`&&j(r,e.answer,n);break;case`Name`:r=st(n,i);break;default:r=ct(n,i)}let a=tt([n,...tt(r).slice(0,3)]);for(;a.length<3;)a.push(`Option ${a.length+1}`);return a.slice(0,4)}var ut=null;function M(){return typeof window<`u`&&`Notification`in window}async function dt(){if(!M())return{ok:!1,reason:`unsupported`};if(Notification.permission===`granted`)return{ok:!0,permission:`granted`};if(Notification.permission===`denied`)return{ok:!1,reason:`denied`,permission:`denied`};try{let e=await Notification.requestPermission();return e===`granted`?{ok:!0,permission:e}:e===`denied`?{ok:!1,reason:`denied`,permission:e}:{ok:!1,reason:`default`,permission:e}}catch{return{ok:!1,reason:`error`}}}function ft(){ut!=null&&(clearTimeout(ut),ut=null)}function N(e,t){if(ft(),!t||!M()||Notification.permission!==`granted`)return;let[n,r]=(e||`09:00`).split(`:`).map(e=>parseInt(e,10)),i=new Date,a=new Date;a.setHours(n||9,r||0,0,0),a<=i&&a.setDate(a.getDate()+1);let o=a.getTime()-i.getTime();ut=setTimeout(()=>{try{new Notification(`Memorized`,{body:`Time for a quick practice session.`,icon:`./icons/icon-192.png`,tag:`memorized-daily`})}catch{}N(e,!0)},o)}function pt(e){return e.reason===`unsupported`?`Notifications are not supported in this browser.`:e.reason===`denied`||e.permission===`denied`?`Notifications are blocked. Enable them in your browser site settings if you want a daily reminder.`:e.ok?``:`Could not enable notifications. You can try again from Settings.`}var mt=`0.5.0`.split(`.`).slice(0,2).join(`.`),ht=[`Date`,`Name`,`Phone number`,`Event`,`Other`],gt=[{id:`en`,label:`English`},{id:`zh`,label:`中文 (soon)`},{id:`ms`,label:`Bahasa Melayu (soon)`},{id:`ta`,label:`தமிழ் (soon)`}],P=d(),F=`home`,_t=`home`,vt=null,I=``,L=null,R=null,yt=`memorized:sync`,z={ready:!C,user:null},B=null,V={email:``,password:``,showPw:!1,error:``,info:``,busy:!1},H=!1,U=!1,W={status:`idle`,lastSyncedAt:Vt().lastSyncedAt||null,inFlight:null,again:!1,timer:null,retryTimer:null,retryDelay:0,lastAttempt:0},G=document.getElementById(`app`);function K(){f(P),Wt()}function q(){return new Date().toISOString()}function bt(){P.settings.updatedAt=q()}function xt(){document.documentElement.dataset.theme=P.settings.theme===`dark`?`dark`:`light`;let e=P.settings.fontSize;document.documentElement.dataset.font=e==="default"?`default`:e===`xlarge`||e===`extra large`?`xlarge`:`large`;let t=document.querySelector(`meta[name="theme-color"]`);t&&t.setAttribute(`content`,P.settings.theme===`dark`?`#1C1917`:`#0F5C56`)}function J(e){let t=document.querySelector(`.toast`);t&&t.remove();let n=document.createElement(`div`);n.className=`toast`,n.textContent=e,document.body.appendChild(n),clearTimeout(vt),vt=setTimeout(()=>n.remove(),2200)}function St(){return ce(P.items).length}function Ct(){return P.items.filter(me).length}function wt(e){let t=String(e||``).trim();if(!t)return;let n=Je(t);if(!n.answer){J(`Could not parse — try again`);return}let r={id:p(),raw:t,type:n.type,question:n.question,answer:n.answer,label:n.label,createdAt:new Date().toISOString(),...le(),updatedAt:new Date().toISOString()};P.items.unshift(r),K(),J(`Saved`),$()}function Tt(e){P.items=P.items.filter(t=>t.id!==e),P.stats={...P.stats,deletedIds:a(P.stats.deletedIds,[{id:e,deletedAt:q()}])},K(),J(`Deleted`),R=null,$()}function Et(e,t){P.items=P.items.map(n=>n.id===e?{...n,type:t.type,question:t.question.trim(),answer:t.answer.trim(),label:t.label.trim()||t.question.trim().slice(0,40),updatedAt:q()}:n),K(),R=null,J(`Updated`),$()}function Dt(){let e=ce(P.items);if(!e.length){J(`Nothing due right now`);return}L={queue:[...e].sort(()=>Math.random()-.5).map(e=>e.id),index:0,phase:`recall`,input:``,choices:null,selected:null,revealed:!1,lastResult:null},F=`practice`,$()}function Ot(){if(!L)return null;let e=L.queue[L.index];return P.items.find(t=>t.id===e)||null}function kt(e){let t=Ot();if(!t)return;let n={...e?ue(t):de(t),updatedAt:q()};P.items=P.items.map(e=>e.id===t.id?n:e),P.stats=pe(P.stats),P.stats.totalPracticed=(P.stats.totalPracticed||0)+1,P.stats.strongerCount=Ct(),K(),L.lastResult=e?`correct`:`wrong`,L.phase=`reveal`,L.revealed=!0,$()}function At(){let e=Ot();e&&(Ye(L.input,e.answer)?kt(!0):(L.phase=`mcq`,L.choices=lt(e,P.items),L.selected=null,$()))}function jt(e){let t=Ot();t&&L.selected==null&&(L.selected=e,kt(Ye(e,t.answer)))}function Mt(){if(L){if(L.index>=L.queue.length-1){L=null,F=`home`,J(`Session complete`),$();return}L.index+=1,L.phase=`recall`,L.input=``,L.choices=null,L.selected=null,L.revealed=!1,L.lastResult=null,$()}}function Nt(){let e=Ot();e&&(L.phase=`mcq`,L.choices=lt(e,P.items),L.selected=null,$())}async function Pt(e){if(!e){P.settings.notificationsEnabled=!1,ft(),K(),$();return}let t=await dt();t.ok?(P.settings.notificationsEnabled=!0,N(P.settings.reminderTime,!0),K(),J(`Daily reminder on`)):(P.settings.notificationsEnabled=!1,K(),J(pt(t)||`Notifications unavailable`)),$()}function Ft(e,t,n){let r=new Blob([t],{type:n||`application/json;charset=utf-8`}),i=URL.createObjectURL(r),a=document.createElement(`a`);a.href=i,a.download=e,a.rel=`noopener`,document.body.appendChild(a),a.click(),a.remove(),setTimeout(()=>URL.revokeObjectURL(i),1500)}function It(){let{filename:e,json:t}=te(P);Ft(e,t,`application/json;charset=utf-8`),J(`Exported ${P.items.length} item${P.items.length===1?``:`s`}`)}async function Lt(){if(typeof window.showSaveFilePicker!=`function`){It();return}try{let{filename:e,json:t}=te(P),n=await(await window.showSaveFilePicker({suggestedName:e,types:[{description:`Memorized backup`,accept:{"application/json":[`.json`]}}]})).createWritable();await n.write(t),await n.close(),J(`Saved ${P.items.length} item${P.items.length===1?``:`s`}`)}catch(e){if(e&&e.name===`AbortError`)return;It()}}function Rt(){let e=ie(P);Ft(ae(),e,`text/csv;charset=utf-8`),J(`CSV: ${P.items.length} item${P.items.length===1?``:`s`}`)}function zt(){return confirm(`Import backup
+
+OK = Replace all data with this file
+Cancel = choose Merge instead`)?`replace`:confirm(`Merge by id?
+
+OK = Merge (same id updates; new ids added)
+Cancel = abort import`)?`merge`:null}async function Bt(e){if(!e)return;let t;try{t=await e.text()}catch{J(`Could not read file`);return}let n=ne(t);if(!n.ok){J(`Import failed: ${n.error}`);return}let r=zt();if(!r){J(`Import cancelled`);return}let i=Array.isArray(n.doc.items)?n.doc.items.length:0,o=r===`replace`?`Replace ALL current data with ${i} item${i===1?``:`s`} from the file?`:`Merge ${i} item${i===1?``:`s`} by id into current data?`;if(!confirm(o)){J(`Import cancelled`);return}try{let e=re(P,n.doc,r),t=q(),i=new Set(n.doc.items.map(e=>e&&typeof e.id==`string`?e.id:null).filter(Boolean)),o=e.items.map(e=>r===`replace`||i.has(e.id)?{...e,updatedAt:t}:e),s=e.stats.deletedIds||[];if(r===`replace`){let e=new Set(o.map(e=>e.id)),n=P.items.filter(t=>!e.has(t.id)).map(e=>({id:e.id,deletedAt:t}));s=a(P.stats.deletedIds,s,n).filter(t=>!e.has(t.id))}P={items:o,settings:n.doc.settings?{...e.settings,updatedAt:t}:e.settings,stats:{...e.stats,deletedIds:s}},K(),xt(),P.settings.notificationsEnabled&&M()&&typeof Notification<`u`&&Notification.permission===`granted`?N(P.settings.reminderTime,!0):ft(),J(r===`replace`?`Replaced — ${e.importedCount} item${e.importedCount===1?``:`s`}`:`Merged — ${e.importedCount} from file, ${e.totalCount} total`),$()}catch(e){J(`Import error: ${e?.message||`unknown`}`)}}function Vt(){try{return JSON.parse(localStorage.getItem(yt)||`{}`)||{}}catch{return{}}}function Ht(e){try{localStorage.setItem(yt,JSON.stringify(e))}catch{}}function Ut(e){let{doc:t}=te(e);return JSON.stringify({items:t.items,settings:t.settings,meta:t.meta})}function Wt(e=3e3){z.user&&(clearTimeout(W.timer),W.timer=setTimeout(()=>X(`change`),e))}function Gt(){z.user&&(clearTimeout(W.retryTimer),W.retryDelay=Math.min(Math.max(W.retryDelay*2,15e3),3e5),W.retryTimer=setTimeout(()=>X(`retry`),W.retryDelay))}function Y(e){W.status=e,Yt()}function X(e=`manual`){if(!z.user)return Promise.resolve(!1);if(W.inFlight)return W.again=!0,W.inFlight;if(clearTimeout(W.timer),clearTimeout(W.retryTimer),W.lastAttempt=Date.now(),typeof navigator<`u`&&navigator.onLine===!1)return Y(`offline`),Gt(),Promise.resolve(!1);let t=z.user.id;return Y(`syncing`),W.inFlight=(async()=>{try{let n=await ze(t);if(!z.user||z.user.id!==t)return!1;let r=null;if(n&&n.data){let e=ne(n.data);if(!e.ok)return Y(`newer`),!1;r=xe(e.doc)}let i=Ut(P);P=r?Se(P,r):Se(P,null),f(P);let a=Ut(P)!==i;return await Be(t,te(P).doc),!z.user||z.user.id!==t?!1:(W.lastSyncedAt=q(),W.retryDelay=0,Ht({userId:t,lastSyncedAt:W.lastSyncedAt}),Y(`ok`),a&&(xt(),Kt()),e===`signin`&&r&&a&&J(`Your facts are up to date`),!0)}catch(e){return e&&e.kind===`notsetup`?Y(`notsetup`):(Y(e&&e.kind===`offline`?`offline`:`error`),Gt()),!1}finally{W.inFlight=null,W.again&&(W.again=!1,Wt(1e3))}})(),W.inFlight}function Kt(){if(L||R||U||H||B)return;let e=document.activeElement;(!e||e.tagName!==`INPUT`&&e.tagName!==`TEXTAREA`||!e.value)&&$()}function qt(e){let t=Date.parse(e||``);if(!Number.isFinite(t))return``;let n=Math.max(0,Date.now()-t),r=Math.round(n/6e4);if(r<1)return`just now`;if(r<60)return`${r} minute${r===1?``:`s`} ago`;let i=new Date(t),a=i.toLocaleTimeString([],{hour:`numeric`,minute:`2-digit`}),o=new Date;if(i.toDateString()===o.toDateString())return`today at ${a}`;let s=new Date(o);return s.setDate(o.getDate()-1),i.toDateString()===s.toDateString()?`yesterday at ${a}`:i.toLocaleDateString([],{day:`numeric`,month:`short`,year:`numeric`})}function Jt(){switch(W.status){case`syncing`:return`Syncing…`;case`error`:case`offline`:return`Not synced — will retry`;case`notsetup`:return`Sync isn’t set up yet`;case`newer`:return`Please update the app to sync`;default:return W.lastSyncedAt?`Last synced ${qt(W.lastSyncedAt)}`:`Not synced yet`}}function Yt(){document.querySelectorAll(`[data-sync-status]`).forEach(e=>{e.textContent=Jt(),e.classList.toggle(`warn`,[`error`,`offline`,`notsetup`,`newer`].includes(W.status))}),document.querySelectorAll(`[data-sync-now]`).forEach(e=>{e.disabled=W.status===`syncing`});let e=document.querySelector(`[data-sync-hint]`);e&&(e.hidden=!z.user||W.status!==`error`&&W.status!==`offline`)}function Xt(e,t){let n=z.user?.id||null,r=t?.user||null;if(z={ready:!0,user:r},setTimeout(yn,0),e===`PASSWORD_RECOVERY`){H=!0,V={...V,password:``,showPw:!1,error:``,info:``,busy:!1},$();return}if(!r){clearTimeout(W.timer),clearTimeout(W.retryTimer),W.status=`idle`,$();return}let i=Vt();i.userId&&i.userId!==r.id&&(W.lastSyncedAt=null),!n||n!==r.id?(B&&(B=null,V={...V,password:``,error:``,info:``,busy:!1}),e===`SIGNED_IN`&&rn===`signup`&&J(`Email confirmed. You’re signed in.`),rn=null,H||Zt(),X(e===`INITIAL_SESSION`?`open`:`signin`)):H||Yt()}function Zt(){F===`account`&&!L&&!R?$():Kt()}function Qt(e){return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)}function $t(e){B=e,V={...V,password:``,showPw:!1,error:``,info:``,busy:!1},$();let t=G.querySelector(e===`forgot`||!V.email?`#acct-email`:`#acct-password`);t&&t.focus()}function Z(e,t=``){V.error=e,V.info=t,V.busy=!1,$()}async function en(e){if(V.busy)return;let t=V.email.trim(),n=V.password;if(e!==`recovery`){if(!t)return Z(`Please enter your email address.`);if(!Qt(t))return Z(`That email address doesn’t look right. Please check it.`)}if(e===`signin`&&!n)return Z(`Please enter your password.`);if((e===`signup`||e===`recovery`)&&n.length<8)return Z(`Please use at least 8 characters for your password.`);V.busy=!0,V.error=``,V.info=``,$();try{if(e===`signin`)await Ne(t,n),V.password=``,V.busy=!1,B=null,J(`Signed in`),$();else if(e===`signup`){let e=await Pe(t,n);V.password=``,e?.session?(B=null,V.busy=!1,J(`Account created. You’re signed in.`),$()):e?.user&&Array.isArray(e.user.identities)&&e.user.identities.length===0?(B=`signin`,Z(``,`There may already be an account with this email. Please sign in, or use “Forgot password?”.`)):(B=`signin`,Z(``,`Check your email to confirm, then sign in.`))}else e===`forgot`?(await Fe(t),Z(``,`If there is an account for this email, we’ve sent a link to set a new password. Please check your inbox.`)):e===`recovery`&&(await Ie(n),V.password=``,V.busy=!1,H=!1,B=null,F=`account`,J(`Password updated. You’re signed in.`),$(),X(`signin`))}catch(e){Z(Ve(e))}}async function tn(){if(!z.user)return!1;let e=new Promise(e=>setTimeout(()=>e(!1),6e3));return Promise.race([X(`signout`),e])}async function nn(e){U=!1,$();let t=await tn();if(e&&!t&&!confirm(`Some recent changes may not have reached your account yet.
+
+Remove facts from this device anyway?`)){J(`Still signed in`);return}try{await Le()}catch{}e&&(P={items:[],settings:{...P.settings},stats:{streak:0,lastPracticeDate:null,totalPracticed:0,strongerCount:0,deletedIds:[]}},f(P),L=null),z={ready:!0,user:null},B=null,W.status=`idle`,W.lastSyncedAt=null,Ht({}),J(e?`Signed out. Facts removed from this device.`:`Signed out. Your facts stay on this device.`),$()}var rn=null,an=``;function on(){let e=window.location.hash.replace(/^#/,``),t=window.location.search.replace(/^\?/,``),n=new URLSearchParams(e||t),r=n.get(`type`);r===`recovery`&&(H=!0,F=`account`),r&&(rn=r);let i=n.get(`error_code`)||n.get(`error`);i&&(an=i===`otp_expired`||/expired|invalid/i.test(n.get(`error_description`)||``)?`That email link has expired or was already used. Please ask for a new one.`:`That email link didn’t work. Please try again.`,F=`account`,B=`signin`,V.error=an,H=!1,history.replaceState(null,``,window.location.pathname))}function sn(e,t,n){return`
+    <div class="field">
+      <label class="label" for="acct-password">${e}</label>
+      <div class="pw-wrap">
+        <input class="input" id="acct-password" type="${V.showPw?`text`:`password`}"
+          autocomplete="${t}" autocapitalize="off" spellcheck="false"
+          value="${Q(V.password)}" data-acct-password />
+        <button type="button" class="pw-toggle" data-pw-toggle aria-pressed="${V.showPw}"
+          aria-controls="acct-password">${V.showPw?`Hide`:`Show`}</button>
+      </div>
+      ${n?`<p class="hint field-hint">${n}</p>`:``}
+    </div>`}function cn(){return`
+    <div class="field">
+      <label class="label" for="acct-email">Email</label>
+      <input class="input" id="acct-email" type="email" inputmode="email" autocomplete="email"
+        autocapitalize="off" spellcheck="false" value="${Q(V.email)}" data-acct-email />
+    </div>`}function ln(){return`${V.error?`<div class="form-msg error" role="alert">${Q(V.error)}</div>`:``}${V.info?`<div class="form-msg info" role="status">${Q(V.info)}</div>`:``}`}var un=`Your facts are stored in your private account. Only you can see them.`;function dn(){if(!C)return`
+      <div class="card account-card">
+        <p style="margin:0">Accounts aren’t available in this version. Your facts stay on this device.</p>
+      </div>`;if(!z.ready)return`
+      <div class="card account-card">
+        <p style="margin:0">Checking your account…</p>
+      </div>`;if(z.user)return`
+      <div class="card account-card">
+        <div class="account-label">Signed in as</div>
+        <div class="account-email">${Q(z.user.email||``)}</div>
+        <div class="sync-status" data-sync-status aria-live="polite">${Q(Jt())}</div>
+        <div class="btn-row two">
+          <button type="button" class="btn btn-secondary" data-sync-now ${W.status===`syncing`?`disabled`:``}>Sync now</button>
+          <button type="button" class="btn btn-ghost" data-sign-out>Sign out</button>
+        </div>
+        <p class="privacy-line">${un}</p>
+      </div>`;let e=V.busy?`disabled`:``;return B===`signin`?`
+      <div class="card account-card">
+        <h2 style="margin-top:0">Sign in</h2>
+        <form data-auth-form="signin" novalidate>
+          ${ln()}
+          ${cn()}
+          ${sn(`Password`,`current-password`)}
+          <button type="button" class="link-btn" data-auth-open="forgot">Forgot password?</button>
+          <div class="btn-row">
+            <button type="submit" class="btn btn-primary" ${e}>${V.busy?`Signing in…`:`Sign in`}</button>
+            <button type="button" class="btn btn-ghost" data-auth-cancel>Cancel</button>
+          </div>
+          <p class="hint auth-switch">New here? <button type="button" class="link-btn inline" data-auth-open="signup">Create account</button></p>
+        </form>
+        <p class="privacy-line">${un}</p>
+      </div>`:B===`signup`?`
+      <div class="card account-card">
+        <h2 style="margin-top:0">Create account</h2>
+        <form data-auth-form="signup" novalidate>
+          ${ln()}
+          ${cn()}
+          ${sn(`Password`,`new-password`,`At least 8 characters.`)}
+          <div class="btn-row">
+            <button type="submit" class="btn btn-primary" ${e}>${V.busy?`Creating…`:`Create account`}</button>
+            <button type="button" class="btn btn-ghost" data-auth-cancel>Cancel</button>
+          </div>
+          <p class="hint auth-switch">Already have an account? <button type="button" class="link-btn inline" data-auth-open="signin">Sign in</button></p>
+        </form>
+        <p class="privacy-line">${un}</p>
+      </div>`:B===`forgot`?`
+      <div class="card account-card">
+        <h2 style="margin-top:0">Forgot password</h2>
+        <p>Enter your email and we’ll send you a link to set a new password.</p>
+        <form data-auth-form="forgot" novalidate>
+          ${ln()}
+          ${cn()}
+          <div class="btn-row">
+            <button type="submit" class="btn btn-primary" ${e}>${V.busy?`Sending…`:`Send reset link`}</button>
+            <button type="button" class="btn btn-ghost" data-auth-open="signin">Back to sign in</button>
+          </div>
+        </form>
+      </div>`:`
+    <div class="card account-card">
+      <p style="margin-top:0">Sign in to keep your facts on all your devices.</p>
+      <div class="btn-row">
+        <button type="button" class="btn btn-primary" data-auth-open="signin">Sign in</button>
+        <button type="button" class="btn btn-ghost" data-auth-open="signup">Create account</button>
+      </div>
+      <p class="privacy-line">${un}</p>
+    </div>`}function fn(){let e=V.busy?`disabled`:``;return`
+    <div class="page">
+      <div class="topbar"><h1 style="margin:0">Set a new password</h1></div>
+      <div class="card account-card">
+        <p>Choose a new password for your account.</p>
+        <form data-auth-form="recovery" novalidate>
+          ${ln()}
+          ${sn(`New password`,`new-password`,`At least 8 characters.`)}
+          <div class="btn-row">
+            <button type="submit" class="btn btn-primary" ${e}>${V.busy?`Saving…`:`Save new password`}</button>
+            <button type="button" class="btn btn-ghost" data-recovery-cancel>Not now</button>
+          </div>
+        </form>
+      </div>
+    </div>`}function pn(){return U?`
+    <div class="modal-backdrop" data-signout-backdrop>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="signout-title">
+        <h2 id="signout-title">Keep facts on this device?</h2>
+        <p>Your facts stay safe in your account either way. Keep them here to go on practising on this device.</p>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" data-signout-keep>Keep</button>
+          <button type="button" class="btn btn-danger" data-signout-remove>Remove from this device</button>
+          <button type="button" class="btn btn-ghost" data-signout-cancel>Cancel</button>
+        </div>
+      </div>
+    </div>`:``}function mn(){G.querySelectorAll(`[data-auth-open]`).forEach(e=>{e.addEventListener(`click`,()=>$t(e.getAttribute(`data-auth-open`)))}),G.querySelectorAll(`[data-auth-cancel]`).forEach(e=>{e.addEventListener(`click`,()=>{B=null,V={...V,password:``,error:``,info:``,busy:!1},$()})});let e=G.querySelector(`[data-acct-email]`);e&&e.addEventListener(`input`,()=>V.email=e.value);let t=G.querySelector(`[data-acct-password]`);t&&t.addEventListener(`input`,()=>V.password=t.value);let n=G.querySelector(`[data-pw-toggle]`);n&&n.addEventListener(`click`,()=>{V.showPw=!V.showPw,$();let e=G.querySelector(`[data-acct-password]`);e&&(e.focus(),e.setSelectionRange(e.value.length,e.value.length))}),G.querySelectorAll(`form[data-auth-form]`).forEach(e=>{e.addEventListener(`submit`,t=>{t.preventDefault(),en(e.getAttribute(`data-auth-form`))})});let r=G.querySelector(`[data-recovery-cancel]`);r&&r.addEventListener(`click`,()=>{H=!1,V={...V,password:``,error:``,info:``,busy:!1},F=`account`,$(),X(`open`)});let i=G.querySelector(`[data-sync-now]`);i&&i.addEventListener(`click`,async()=>{await X(`manual`)&&J(`Synced`)});let a=G.querySelector(`[data-sign-out]`);a&&a.addEventListener(`click`,()=>{U=!0,$();let e=G.querySelector(`[data-signout-keep]`);e&&e.focus()});let o=G.querySelector(`[data-signout-keep]`);o&&o.addEventListener(`click`,()=>nn(!1));let s=G.querySelector(`[data-signout-remove]`);s&&s.addEventListener(`click`,()=>nn(!0));let c=G.querySelector(`[data-signout-cancel]`);c&&c.addEventListener(`click`,()=>{U=!1,$()});let l=G.querySelector(`[data-signout-backdrop]`);l&&l.addEventListener(`click`,e=>{e.target===l&&(U=!1,$())})}function Q(e){return String(e??``).replace(/&/g,`&amp;`).replace(/</g,`&lt;`).replace(/>/g,`&gt;`).replace(/"/g,`&quot;`)}function hn(){return`
+    <nav class="nav" aria-label="Main">
+      ${[{id:`home`,label:`Home`,icon:`⌂`},{id:`practice`,label:`Practice`,icon:`✎`},{id:`items`,label:`Items`,icon:`☰`}].map(e=>`
+        <button type="button" data-nav="${e.id}" class="${F===e.id?`active`:``}">
+          <span class="nav-icon" aria-hidden="true">${e.icon}</span>
+          ${e.label}
+        </button>`).join(``)}
+    </nav>`}function gn(e){let t=Array.from(String(e||``).trim()).find(e=>/[\p{L}\p{N}]/u.test(e));return t?t.toLocaleUpperCase():``}var _n=`<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><circle cx="12" cy="8.5" r="4" fill="currentColor"/><path d="M4 20.5c0-4.1 3.6-6.5 8-6.5s8 2.4 8 6.5" fill="currentColor"/></svg>`;function vn(){let e=z.user?.email||``,t=z.user?gn(e):``;return`<button type="button" class="avatar-btn" data-avatar aria-label="${Q(z.user?e?`Account, signed in as ${e}`:`Account, signed in`:`Account`)}">
+            <span class="avatar ${z.user?`in`:`out`}" aria-hidden="true">${t?Q(t):_n}</span>
+          </button>`}function yn(){let e=G.querySelector(`[data-avatar]`);if(!e)return;let t=document.createElement(`template`);t.innerHTML=vn().trim();let n=t.content.firstElementChild;e.replaceWith(n),bn(n)}function bn(e){e&&e.addEventListener(`click`,xn)}function xn(){F!==`account`&&(_t=[`home`,`practice`,`items`,`settings`].includes(F)?F:`home`),L=null,B=null,V={...V,password:``,showPw:!1,error:``,info:``,busy:!1},F=`account`,$(),window.scrollTo(0,0);let e=G.querySelector(`#account-title`);e&&e.focus({preventScroll:!0})}function Sn(){B=null,V={...V,password:``,showPw:!1,error:``,info:``,busy:!1},F=_t||`home`,_t=`home`,$(),window.scrollTo(0,0)}function Cn(){return`
+    <div class="page account-page">
+      <div class="topbar account-topbar">
+        <button type="button" class="back-btn" data-account-back aria-label="Back">
+          <span aria-hidden="true">←</span> Back
+        </button>
+        <h1 id="account-title" class="account-title" tabindex="-1">Account</h1>
+      </div>
+      ${dn()}
+    </div>`}function wn(){let e=St();return`
+    <div class="page">
+      <div class="topbar">
+        <div class="topbar-left">
+          ${vn()}
+          <div class="brand">Memorized</div>
+        </div>
+        <button type="button" class="icon-btn" data-go="settings" aria-label="Settings">⚙</button>
+      </div>
+      <button type="button" class="sync-hint" data-sync-hint data-open-account
+        aria-label="Not synced — will retry. Open Account" ${z.user&&(W.status===`error`||W.status===`offline`)?``:`hidden`}>Not synced — will retry <span aria-hidden="true">›</span></button>
+
+      <div class="due-banner">
+        <span class="pill">${e} due</span>
+        <button type="button" class="btn btn-primary" style="width:auto;padding:10px 16px" data-start-practice ${e?``:`disabled`}>Start practice</button>
+      </div>
+
+      <div class="card add-box">
+        <label class="add-title" for="add-input">Enter an item. Tap Memorized.</label>
+        <textarea class="textarea" id="add-input" placeholder="e.g. Mum Birthday 4 Jul 1947"></textarea>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" data-add>Memorized</button>
+        </div>
+      </div>
+    </div>`}function Tn(e,t){return`${e.question} ${e.answer} ${e.label} ${e.raw} ${e.type}`.toLowerCase().includes(t)}function En(e){let t=ge(c(e)),n=ye(e);return`<span class="nw">Created ${Q(t)}</span><span class="sep" aria-hidden="true"> · </span><span class="nw">Practice ${Q(n)}</span>`}function Dn(e){let t=(e||``).trim().toLowerCase(),n=t?P.items.filter(e=>Tn(e,t)):P.items;return n.length?`<div class="list">
+        ${n.map(e=>`
+          <div class="list-item" data-item="${e.id}">
+            <div class="body item-row">
+              <span class="type-badge">${Q(e.type)}</span>
+              <span class="q">${Q(e.question)}</span>
+              <span class="meta">${Q(e.answer)}</span>
+              <span class="meta item-dates">${En(e)}</span>
+            </div>
+            <div class="actions">
+              <button type="button" class="tiny-btn" data-edit="${e.id}">Edit</button>
+              <button type="button" class="tiny-btn danger" data-delete="${e.id}">Delete</button>
+            </div>
+          </div>`).join(``)}
+      </div>`:`<div class="empty">No matches</div>`}function On(e){let t=(e||``).trim().toLowerCase();return t?`${P.items.filter(e=>Tn(e,t)).length} of ${P.items.length}`:String(P.items.length)}function kn(){let e=G.querySelector(`#items-results`);e&&(e.innerHTML=Dn(I),In(e));let t=G.querySelector(`[data-items-count]`);t&&(t.textContent=On(I))}function An(){return`
+      <section class="progress-summary" aria-label="Your progress">
+        <div class="stat-grid compact">
+          <div class="stat"><div class="num">${P.stats.streak||0}</div><div class="cap">Streak</div></div>
+          <div class="stat"><div class="num">${P.stats.totalPracticed||0}</div><div class="cap">Practiced</div></div>
+          <div class="stat"><div class="num">${Ct()}</div><div class="cap">Stronger</div></div>
+        </div>
+        <p class="progress-note">Practice when items are due to keep a gentle streak. “Stronger” = reached the 14-day step or beyond.</p>
+      </section>`}function jn(){if(!L){let e=St();return`
+      <div class="page">
+        <div class="topbar"><h1>Practice</h1></div>
+        ${An()}
+        <div class="card">
+          <p>${e?`${e} item${e===1?``:`s`} due today.`:`Nothing due. Add facts on Home, or check back tomorrow.`}</p>
+          <button type="button" class="btn btn-primary" data-start-practice ${e?``:`disabled`}>Start practice</button>
+        </div>
+      </div>`}let e=Ot();if(!e)return L=null,jn();let t=L.queue.length,n=L.index+1,r=``;if(L.phase===`recall`)r=`
+      <div class="card">
+        <div class="practice-progress">${n} of ${t}</div>
+        <span class="type-badge">${Q(e.type)}</span>
+        <div class="question">${Q(e.question)}</div>
+        <label class="label" for="recall">Your answer</label>
+        <input class="input" id="recall" autocomplete="off" autocapitalize="off" value="${Q(L.input)}" />
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" data-submit-recall>Check</button>
+          <button type="button" class="btn btn-ghost" data-dont-remember>Don't remember</button>
+        </div>
+      </div>`;else if(L.phase===`mcq`){let i=L.choices||[];r=`
+      <div class="card">
+        <div class="practice-progress">${n} of ${t} · multiple choice</div>
+        <span class="type-badge">${Q(e.type)}</span>
+        <div class="question">${Q(e.question)}</div>
+        <div class="mcq">
+          ${i.map(e=>`<button type="button" data-mcq="${Q(e)}">${Q(e)}</button>`).join(``)}
+        </div>
+      </div>`}else{let i=L.lastResult===`correct`;r=`
+      <div class="card">
+        <div class="practice-progress">${n} of ${t}</div>
+        <span class="type-badge">${Q(e.type)}</span>
+        <div class="question">${Q(e.question)}</div>
+        <div class="feedback ${i?`ok`:`bad`}">
+          ${i?`Correct`:`Not quite`} — ${Q(e.answer)}
+        </div>
+        <p style="margin-top:12px;font-size:var(--font-small)">
+          Next review in ${e.intervalDays||b[e.intervalIndex||0]} day${(e.intervalDays||1)===1?``:`s`}.
+        </p>
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" data-next-card>${n>=t?`Done`:`Next`}</button>
+        </div>
+      </div>`}return`<div class="page"><div class="topbar"><h1>Practice</h1></div>${An()}${r}</div>`}function Mn(){return P.items.length?`
+    <div class="page">
+      <div class="search-wrap items-search">
+        <label class="sr-only" for="items-search">Search</label>
+        <input class="input" id="items-search" type="search" placeholder="Search" autocomplete="off" data-items-search value="${Q(I)}" />
+      </div>
+      <div class="topbar"><h1>Items</h1><span class="pill muted" data-items-count>${Q(On(I))}</span></div>
+      <div id="items-results">${Dn(I)}</div>
+    </div>`:`
+      <div class="page">
+        <div class="topbar"><h1>Items</h1></div>
+        <div class="empty">No items yet. Add a fact from Home.</div>
+      </div>`}function Nn(){let e=P.settings,t=M()?Notification.permission===`denied`?`Notifications are blocked. Enable them in your browser site settings if you want a daily reminder.`:`Reminders fire best while the app is open or installed as a PWA. Android Chrome may limit alerts when the site is fully closed.`:`Notifications are not supported in this browser.`;return`
+    <div class="page">
+      <div class="topbar">
+        <button type="button" class="icon-btn" data-go="home" aria-label="Back">←</button>
+        <h1 style="flex:1;margin:0">Settings</h1>
+      </div>
+
+      <div class="card">
+        <div class="settings-row">
+          <div class="left"><strong>Theme</strong><span>Light or Dark</span></div>
+          <div class="segmented" data-setting="theme">
+            <button type="button" data-val="light" class="${e.theme===`light`?`on`:``}">Light</button>
+            <button type="button" data-val="dark" class="${e.theme===`dark`?`on`:``}">Dark</button>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="left"><strong>Font</strong><span>Default · Large · Extra large</span></div>
+        </div>
+        <div class="segmented" data-setting="fontSize" style="width:100%;margin-bottom:8px">
+          <button type="button" data-val="default" class="${e.fontSize==="default"?`on`:``}">Default</button>
+          <button type="button" data-val="large" class="${e.fontSize===`large`||!e.fontSize?`on`:``}">Large</button>
+          <button type="button" data-val="xlarge" class="${e.fontSize===`xlarge`||e.fontSize===`extra large`?`on`:``}">Extra large</button>
+        </div>
+
+        <div class="settings-row">
+          <div class="left"><strong>Daily reminder</strong><span>Browser notification</span></div>
+          <button type="button" class="toggle ${e.notificationsEnabled?`on`:``}" data-toggle-notif aria-label="Toggle reminder"></button>
+        </div>
+        <div class="field">
+          <label class="label" for="remind-time">Reminder time</label>
+          <input class="input" type="time" id="remind-time" value="${Q(e.reminderTime||`09:00`)}" />
+        </div>
+        <div class="notice">${Q(t)}</div>
+
+        <div class="settings-row" style="margin-top:8px">
+          <div class="left"><strong>Language</strong><span>English is fully supported</span></div>
+        </div>
+        <select class="select" data-lang>
+          ${gt.map(t=>`<option value="${t.id}" ${e.language===t.id?`selected`:``}>${Q(t.label)}</option>`).join(``)}
+        </select>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-top:0">Data</h2>
+        <p class="hint" style="margin-top:0">Keep a copy of this file to move phones or recover after clearing browser data.</p>
+        <div class="btn-row" style="flex-direction:column;gap:8px">
+          <button type="button" class="btn btn-primary" data-export-json>Export data</button>
+          ${typeof window.showSaveFilePicker==`function`?`<button type="button" class="btn btn-ghost" data-export-save>Save to file…</button>`:``}
+          <button type="button" class="btn btn-ghost" data-export-csv>Export as CSV</button>
+          <button type="button" class="btn btn-ghost" data-import-trigger>Import / migrate</button>
+        </div>
+        <input type="file" accept="application/json,.json" hidden data-import-file />
+        <div class="notice" style="margin-top:12px">
+          Export downloads a readable JSON backup (items + settings). Import asks Replace all vs Merge by id.
+        </div>
+      </div>
+
+      <div class="card">
+        <p style="margin:0;font-size:var(--font-small)">Privacy: your facts are always kept on this device, and the app works without an account. If you sign in (tap the round icon on Home), a copy is kept in your private account so your devices stay in step. Use Export to keep a portable copy.</p>
+      </div>
+
+      <p class="app-version">Release ${Q(mt)}</p>
+    </div>`}function Pn(){if(!R)return``;let e=P.items.find(e=>e.id===R);return e?`
+    <div class="modal-backdrop" data-close-modal>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-title">
+        <h2 id="edit-title">Edit item</h2>
+        <div class="field">
+          <label class="label" for="edit-type">Type</label>
+          <select class="select" id="edit-type">
+            ${ht.map(t=>`<option value="${t}" ${e.type===t?`selected`:``}>${t}</option>`).join(``)}
+          </select>
+        </div>
+        <div class="field">
+          <label class="label" for="edit-label">Label</label>
+          <input class="input" id="edit-label" value="${Q(e.label)}" />
+        </div>
+        <div class="field">
+          <label class="label" for="edit-q">Question</label>
+          <input class="input" id="edit-q" value="${Q(e.question)}" />
+        </div>
+        <div class="field">
+          <label class="label" for="edit-a">Answer</label>
+          <input class="input" id="edit-a" value="${Q(e.answer)}" />
+        </div>
+        <div class="btn-row two">
+          <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+          <button type="button" class="btn btn-primary" data-save-edit>Save</button>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-danger" data-delete-edit>Delete</button>
+        </div>
+      </div>
+    </div>`:``}function $(){if(xt(),F===`progress`&&(F=`practice`),F!==`items`&&(I=``),H){G.innerHTML=fn(),Fn();return}let e=``;switch(F){case`practice`:e=jn();break;case`items`:e=Mn();break;case`settings`:e=Nn();break;case`account`:e=Cn();break;default:e=wn()}G.innerHTML=e+(F!==`settings`&&F!==`account`?hn():``)+Pn()+pn(),Fn()}function Fn(){G.querySelectorAll(`[data-nav]`).forEach(e=>{e.addEventListener(`click`,()=>{let t=e.getAttribute(`data-nav`);if(t===`practice`&&!L){F=`practice`,$();return}t!==`practice`&&(L=null),F=t,$()})}),G.querySelectorAll(`[data-go]`).forEach(e=>{e.addEventListener(`click`,()=>{F=e.getAttribute(`data-go`),B=null,$()})}),mn(),bn(G.querySelector(`[data-avatar]`)),G.querySelectorAll(`[data-open-account]`).forEach(e=>e.addEventListener(`click`,xn));let e=G.querySelector(`[data-account-back]`);e&&e.addEventListener(`click`,Sn);let t=G.querySelector(`[data-add]`);t&&t.addEventListener(`click`,()=>{let e=G.querySelector(`#add-input`);wt(e?.value),e&&(e.value=``)});let n=G.querySelector(`[data-items-search]`);n&&n.addEventListener(`input`,()=>{I=n.value,kn()}),G.querySelectorAll(`[data-start-practice]`).forEach(e=>{e.addEventListener(`click`,Dt)});let r=G.querySelector(`#recall`);r&&(r.focus(),r.addEventListener(`input`,()=>{L.input=r.value}),r.addEventListener(`keydown`,e=>{e.key===`Enter`&&(e.preventDefault(),At())}));let i=G.querySelector(`[data-submit-recall]`);i&&i.addEventListener(`click`,At);let a=G.querySelector(`[data-dont-remember]`);a&&a.addEventListener(`click`,Nt),G.querySelectorAll(`[data-mcq]`).forEach(e=>{e.addEventListener(`click`,()=>jt(e.getAttribute(`data-mcq`)))});let o=G.querySelector(`[data-next-card]`);o&&o.addEventListener(`click`,Mt),In(G);let s=G.querySelector(`.modal-backdrop`);s&&s.addEventListener(`click`,e=>{e.target===s&&(R=null,$())}),G.querySelectorAll(`button[data-close-modal]`).forEach(e=>{e.addEventListener(`click`,()=>{R=null,$()})});let c=G.querySelector(`.modal`);c&&c.addEventListener(`click`,e=>e.stopPropagation());let l=G.querySelector(`[data-save-edit]`);l&&l.addEventListener(`click`,()=>{Et(R,{type:G.querySelector(`#edit-type`).value,label:G.querySelector(`#edit-label`).value,question:G.querySelector(`#edit-q`).value,answer:G.querySelector(`#edit-a`).value})});let u=G.querySelector(`[data-delete-edit]`);u&&u.addEventListener(`click`,()=>{confirm(`Delete this item?`)&&Tt(R)}),G.querySelectorAll(`[data-setting]`).forEach(e=>{let t=e.getAttribute(`data-setting`);e.querySelectorAll(`button[data-val]`).forEach(e=>{e.addEventListener(`click`,()=>{P.settings[t]=e.getAttribute(`data-val`),bt(),K(),$()})})});let d=G.querySelector(`[data-toggle-notif]`);d&&d.addEventListener(`click`,()=>{Pt(!P.settings.notificationsEnabled)});let f=G.querySelector(`#remind-time`);f&&f.addEventListener(`change`,()=>{P.settings.reminderTime=f.value||`09:00`,bt(),K(),P.settings.notificationsEnabled&&N(P.settings.reminderTime,!0)});let p=G.querySelector(`[data-lang]`);p&&p.addEventListener(`change`,()=>{P.settings.language=p.value,bt(),K(),p.value!==`en`&&J(`Language stub — English UI for now`)});let m=G.querySelector(`[data-export-json]`);m&&m.addEventListener(`click`,It);let h=G.querySelector(`[data-export-save]`);h&&h.addEventListener(`click`,()=>Lt());let g=G.querySelector(`[data-export-csv]`);g&&g.addEventListener(`click`,Rt);let _=G.querySelector(`[data-import-trigger]`),v=G.querySelector(`[data-import-file]`);_&&v&&(_.addEventListener(`click`,()=>v.click()),v.addEventListener(`change`,()=>{let e=v.files&&v.files[0];v.value=``,Bt(e)}))}function In(e){e.querySelectorAll(`[data-edit]`).forEach(e=>{e.addEventListener(`click`,()=>{R=e.getAttribute(`data-edit`),$()})}),e.querySelectorAll(`[data-delete]`).forEach(e=>{e.addEventListener(`click`,()=>{confirm(`Delete this item?`)&&Tt(e.getAttribute(`data-delete`))})})}xt(),P.settings.notificationsEnabled&&M()&&Notification.permission===`granted`&&N(P.settings.reminderTime,!0),C&&on(),$(),C&&(Me(Xt).catch(()=>{z={ready:!0,user:null},Zt(),yn()}),setTimeout(()=>{z.ready||(z={ready:!0,user:null},Zt())},8e3),document.addEventListener(`visibilitychange`,()=>{document.visibilityState===`visible`&&z.user&&Date.now()-W.lastAttempt>15e3&&X(`visible`)}),window.addEventListener(`online`,()=>{z.user&&X(`online`)}),setInterval(Yt,6e4)),Ee(async()=>{let{registerSW:e}=await import(`./virtual_pwa-register-COCPnyD4.js`);return{registerSW:e}},[],import.meta.url).then(({registerSW:e})=>{e({immediate:!0})}).catch(()=>{});export{Ee as t};
